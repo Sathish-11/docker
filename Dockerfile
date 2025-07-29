@@ -1,0 +1,27 @@
+# Use an official Python runtime as a base image
+FROM python:3.11-alpine
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy requirements.txt first if it exists
+COPY requirements.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application files
+COPY . .
+
+# Expose the port your app runs on (adjust if needed)
+EXPOSE 3000
+
+# Define environment variables (can be overridden at runtime)
+ENV MYSQL_HOST=mysql
+ENV MYSQL_USER=devopsadmin
+ENV MYSQL_PASSWORD=secret
+ENV MYSQL_DB=appdb
+
+# Command to run your Python application
+CMD ["python", "app.py"]
+

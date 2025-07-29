@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: sampledb
+    ports:
+      - "3306:3306"
+    networks:
+      - flasknet
+
+  flask-app:
+    image: sathish1102/newimg-py1
+    container_name: new-py-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: sampledb
+    networks:
+      - flasknet
+
+networks:
+  flasknet:
+    driver: bridge

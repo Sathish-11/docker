@@ -23,5 +23,5 @@ ENV MYSQL_PASSWORD=secret
 ENV MYSQL_DB=appdb
 
 # Command to run your Python application
-CMD ["python", "app.py"]
+CMD [gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
 

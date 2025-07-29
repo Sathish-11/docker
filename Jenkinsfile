@@ -7,7 +7,7 @@ pipeline {
         DEPLOY_DIR = "/home/devopsadmin/app-deploy-dir"
         GIT_REPO = "https://github.com/Sathish-11/docker.git"
         DEPLOY_CONTAINER_NAME = "My-first-containe2211"
-        DEPLOY_PORT_MAPPING = "8083:80"
+        DEPLOY_PORT_MAPPING = "8083:8000"
     }
 
     stages {

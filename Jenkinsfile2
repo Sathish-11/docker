@@ -1,0 +1,71 @@
+pipeline {
+    agent { label 'slave01' }
+
+    environment {
+        DOCKER_HUB_IMAGE = "sathish1102/newimg-py1"
+        TEST_SERVER = "172.31.9.228"  // <-- updated here
+        DEPLOY_DIR = "/home/devopsadmin/app-deploy-dir"
+        GIT_REPO = "https://github.com/Sathish-11/docker.git"
+    }
+
+    stages {
+
+        stage('SCM Checkout') {
+            steps {
+                git branch: 'main', credentialsId: '9608b82a-1646-4511-a57f-67e89e948cc0', url: "${GIT_REPO}"
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_HUB_IMAGE .'
+                withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        docker push $DOCKER_HUB_IMAGE
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Test Server using Docker Compose') {
+            steps {
+                script {
+                    sshagent(['Test-Server']) {
+                        sh """
+                        ssh -o StrictHostKeyChecking=no devopsadmin@$TEST_SERVER '
+                            set -e
+
+                            # Clean previous deployment
+                            rm -rf $DEPLOY_DIR
+
+                            # Clone the latest code
+                            git clone $GIT_REPO $DEPLOY_DIR
+
+                            # Navigate and deploy
+                            cd $DEPLOY_DIR
+
+                            # Optional: remove old unused images
+                            docker image prune -af || true
+
+                            # Pull and start services
+                            docker compose down
+                            docker compose pull
+                            docker compose up -d --build
+                        '
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ Deployment failed. Check logs above for details."
+        }
+        success {
+            echo "✅ Deployment to $TEST_SERVER completed successfully."
+        }
+    }
+}

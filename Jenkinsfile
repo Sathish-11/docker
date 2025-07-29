@@ -3,7 +3,7 @@ pipeline {
     stages{
         stage('git cloned'){
             steps{
-                git url:'https://github.com/Sathish-11/docker.git', branch: "master"
+                git url:'https://github.com/Sathish-11/docker.git', branch: "main"
               
             }
         }

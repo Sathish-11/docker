@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_HUB_IMAGE = "sathish1102/new-py1"
-        TEST_SERVER = "172.31.15.47"
+        TEST_SERVER = "	172.31.9.228"
         DEPLOY_DIR = "/home/devopsadmin/app-deploy-dir"
         GIT_REPO = "https://github.com/Sathish-11/docker.git"
         DEPLOY_CONTAINER_NAME = "My-first-containe2211"

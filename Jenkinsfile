@@ -41,7 +41,7 @@ pipeline {
                     def removeContainerCmd = "docker rm -f ${DEPLOY_CONTAINER_NAME} || true"
                     def runContainerCmd = "docker run -itd --name ${DEPLOY_CONTAINER_NAME} -p ${DEPLOY_PORT_MAPPING} ${DOCKER_HUB_IMAGE}"
 
-                    sshagent(['Deploy-Server']) {
+                    sshagent(['Deploy_Server']) {
                         sh """
                             ssh -o StrictHostKeyChecking=no devopsadmin@${TEST_SERVER} '${removeContainerCmd}'
                             ssh -o StrictHostKeyChecking=no devopsadmin@${TEST_SERVER} '${runContainerCmd}'

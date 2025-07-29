@@ -1,29 +1,31 @@
 pipeline {
     agent { label 'slave01' }
+
     environment {
-        DOCKER_HUB_IMAGE = "sathish1102/newimg-py1"
+        DOCKER_HUB_IMAGE = "sathish1102/new-py1"
         TEST_SERVER = "172.31.15.47"
         DEPLOY_DIR = "/home/devopsadmin/app-deploy-dir"
         GIT_REPO = "https://github.com/Sathish-11/docker.git"
+        DEPLOY_CONTAINER_NAME = "My-first-containe2211"
+        DEPLOY_PORT_MAPPING = "8083:80"
     }
-    stages{
-        stage('git cloned'){
-            steps{
-                git url:'$GIT_REPO', branch: "main"
-              
+
+    stages {
+        stage('Clone Git Repo') {
+            steps {
+                git url: "${GIT_REPO}", branch: "main"
             }
         }
-        stage('Build docker image'){
-            steps{
-                script{
-                    sh 'docker build -t $DOCKER_HUB_IMAGE .'
-                    sh 'docker images'
-                }
-            }
-        }
-        stage('Build and Push Docker Image') {
+
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t $DOCKER_HUB_IMAGE .'
+                sh 'docker images'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -32,14 +34,22 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Test Server using Docker Compose') {
-            steps{
-                sshagent(['Deploy_Server']){
-                    withCredentials([usernamePassword(credentialsId: 'a4cc6598-bede-4574-b8a4-bf19bea857f0', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
-                        sh 'docker build -t $Docker_username .'
+
+        stage('Deploy to Remote Server') {
+            steps {
+                script {
+                    def removeContainerCmd = "docker rm -f ${DEPLOY_CONTAINER_NAME} || true"
+                    def runContainerCmd = "docker run -itd --name ${DEPLOY_CONTAINER_NAME} -p ${DEPLOY_PORT_MAPPING} ${DOCKER_HUB_IMAGE}"
+
+                    sshagent(['Deploy-server']) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no devopsadmin@${TEST_SERVER} '${removeContainerCmd}'
+                            ssh -o StrictHostKeyChecking=no devopsadmin@${TEST_SERVER} '${runContainerCmd}'
+                        """
                     }
                 }
-            } 
-      }
+            }
+        }
+    }
 }
+

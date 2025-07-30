@@ -34,25 +34,33 @@ pipeline {
                     sshagent(['Test-Server']) {
                         sh """
                         ssh -o StrictHostKeyChecking=no devopsadmin@$TEST_SERVER '
-                            set -e
+                          set -e
 
-                            # Clean previous deployment
-                            rm -rf $DEPLOY_DIR
-
-                            # Clone the latest code
-                            git clone $GIT_REPO $DEPLOY_DIR
-
-                            # Navigate and deploy
+                          # Instead of removing the whole directory, just update code (safer for docker-compose file)
+                          if [ ! -d "$DEPLOY_DIR" ]; then
+                              git clone $GIT_REPO $DEPLOY_DIR
+                          else
                             cd $DEPLOY_DIR
+                            git fetch --all
+                            git reset --hard origin/main
+                          fi
 
-                            # Optional: remove old unused images
-                            docker image prune -af || true
+                          cd $DEPLOY_DIR
 
-                            # Pull and start services
-                            docker compose down
-                            docker compose pull
-                            docker compose up -d --build
+                          # Clean up old containers and orphan networks
+                          docker-compose down --remove-orphans || true
+                          docker network prune -f || true
+
+                          # Pull latest images (important if using images instead of building)
+                          docker-compose pull
+
+                          # Start containers (build only if you have local Dockerfiles)
+                          docker-compose up -d --build
+
+                          # Optional: prune unused docker images
+                          docker image prune -af || true
                         '
+
                         """
                     }
                 }

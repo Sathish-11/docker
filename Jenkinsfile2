@@ -12,14 +12,14 @@ pipeline {
 
         stage('SCM Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'docker-login', url: "${GIT_REPO}"
+                git branch: 'main', credentialsId: '9608b82a-1646-4511-a57f-67e89e948cc0', url: "${GIT_REPO}"
             }
         }
 
         stage('Build and Push Docker Image') {
             steps {
                 sh 'docker build -t $DOCKER_HUB_IMAGE .'
-                withCredentials([usernamePassword(credentialsId: 'a4cc6598-bede-4574-b8a4-bf19bea857f0', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                         docker push $DOCKER_HUB_IMAGE

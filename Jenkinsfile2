@@ -12,7 +12,7 @@ pipeline {
 
         stage('SCM Checkout') {
             steps {
-                git branch: 'main', credentialsId: '9608b82a-1646-4511-a57f-67e89e948cc0', url: "${GIT_REPO}"
+                git branch: 'main', credentialsId: 'docker-login', url: "${GIT_REPO}"
             }
         }
 

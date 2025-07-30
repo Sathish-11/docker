@@ -14,13 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port your app runs on (adjust if needed)
-EXPOSE 3000
-
-# Define environment variables (can be overridden at runtime)
-ENV MYSQL_HOST=mysql
-ENV MYSQL_USER=devopsadmin
-ENV MYSQL_PASSWORD=secret
-ENV MYSQL_DB=appdb
+EXPOSE 8000
 
 # Command to run your Python application
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]

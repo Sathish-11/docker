@@ -24,6 +24,7 @@ services:
       DB_USER: root
       DB_PASSWORD: rootpass
       DB_NAME: sampledb
+      FLASK_PORT: 8000
     networks:
       - flasknet
 

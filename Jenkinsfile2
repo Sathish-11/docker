@@ -31,7 +31,7 @@ pipeline {
         stage('Deploy to Test Server using Docker Compose') {
             steps {
                 script {
-                    sshagent(['Test_Server']) {
+                    sshagent(['Test-Server']) {
                         sh """
                         ssh -o StrictHostKeyChecking=no devopsadmin@$TEST_SERVER '
                             set -e
